@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Card } from "react-bootstrap";
 
 function App() {
   const apiKey = import.meta.env.VITE_API_KEY;
@@ -32,9 +33,13 @@ function App() {
       <button onClick={handleGenerateWeather}>Generate</button>
       {data && (
         <>
-          <p>{data.timezone}</p>
-          <p>{data.current.temp}</p>
-          <p>{data.daily[0].summary}</p>
+          <Card>
+            <Card.Body>
+              <p>{data.timezone}</p>
+              <p>{data.current.temp}</p>
+              <p>{data.daily[0].summary}</p>
+            </Card.Body>
+          </Card>
         </>
       )}
     </>
