@@ -31,13 +31,22 @@ function App() {
     <>
       <h1>Generate Weather button</h1>
       <button onClick={handleGenerateWeather}>Generate</button>
-      {data && (
+      {data && data.lat && (
         <>
           <Card>
             <Card.Body>
               <p>{data.timezone}</p>
               <p>{data.current.temp}</p>
               <p>{data.daily[0].summary}</p>
+            </Card.Body>
+          </Card>
+        </>
+      )}
+      {data && data.cod && (
+        <>
+          <Card>
+            <Card.Body>
+              <p>{data.message}</p>
             </Card.Body>
           </Card>
         </>
