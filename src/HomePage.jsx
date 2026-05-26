@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Card } from "react-bootstrap";
-
+import { APIProvider, Map } from "@vis.gl/react-google-maps";
 function HomePage() {
   const apiKey = import.meta.env.VITE_API_KEY;
   const url = `http://api.openweathermap.org/geo/1.0/zip?zip=43200,MY&appid=${apiKey}`;
@@ -29,6 +29,25 @@ function HomePage() {
 
   return (
     <>
+      <APIProvider
+        apiKey={"AIzaSyDJc0cT2BuUwuji6FBjAtQtfFv4cnPIIXU"}
+        onLoad={() => console.log("Maps API has loaded")}
+      >
+        <Map
+          defaultZoom={13}
+          defaultCenter={{ lat: -33.860664, lng: 151.208138 }}
+          onCameraChanged={(ev) =>
+            console.log(
+              "camera changed:",
+              ev.detail.center,
+              "zoom:",
+              ev.detail.zoom,
+            )
+          }
+        />
+      </APIProvider>
+
+      {/* 
       <h1>Generate Weather button</h1>
       <button onClick={handleGenerateWeather}>Generate</button>
       {data && data.lat && (
@@ -50,7 +69,7 @@ function HomePage() {
             </Card.Body>
           </Card>
         </>
-      )}
+      )}*/}
     </>
   );
 }
