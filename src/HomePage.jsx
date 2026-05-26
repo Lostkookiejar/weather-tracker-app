@@ -3,6 +3,7 @@ import { Card } from "react-bootstrap";
 import { APIProvider, Map } from "@vis.gl/react-google-maps";
 function HomePage() {
   const apiKey = import.meta.env.VITE_API_KEY;
+  const mapsApiKey = import.meta.env.VITE_MAPS_API_KEY;
   const url = `http://api.openweathermap.org/geo/1.0/zip?zip=43200,MY&appid=${apiKey}`;
 
   const [data, setData] = useState("");
@@ -30,7 +31,7 @@ function HomePage() {
   return (
     <>
       <APIProvider
-        apiKey={"AIzaSyDJc0cT2BuUwuji6FBjAtQtfFv4cnPIIXU"}
+        apiKey={mapsApiKey}
         onLoad={() => console.log("Maps API has loaded")}
       >
         <Map
