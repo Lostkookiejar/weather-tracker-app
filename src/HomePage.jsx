@@ -1,11 +1,12 @@
-import { useState } from "react";
-import { Card } from "react-bootstrap";
+import { useState, useEffect, useRef } from "react";
 import {
   AdvancedMarker,
   APIProvider,
   Map,
   Pin,
+  useMap,
 } from "@vis.gl/react-google-maps";
+import { MarkerClusterer } from "@googlemaps/markerclusterer";
 
 const locations = [
   { key: "operaHouse", location: { lat: -33.8567844, lng: 151.213108 } },
@@ -30,6 +31,7 @@ const locations = [
 
 function HomePage() {
   const mapsApiKey = import.meta.env.VITE_MAPS_API_KEY;
+
   /*
   const apiKey = import.meta.env.VITE_API_KEY;
   
@@ -94,16 +96,51 @@ function HomePage() {
             </Card.Body>
           </Card>
         </>
-      )}*/}
+      )}
+        */}
     </>
   );
 }
 
 const PoiMarkers = ({ pois }) => {
+  const map = useMap();
+  const [markers, setMarkers] = useState({});
+  const clusterer = useRef(null);
+
+  useEffect(() => {
+    if (!map) return;
+    if (!clusterer.current) {
+      clusterer.current = new MarkerClusterer({ map });
+    }
+  }, [map]);
+
+  useEffect(() => {
+    clusterer.current?.clearMarkers();
+    clusterer.current?.addMarkers(Object.values(markers));
+  }, [markers]);
+
+  const setMarkerRef = (marker, key) => {
+    if (marker && markers[key]) return;
+    if (!marker && !markers[key]) return;
+
+    setMarkers((prev) => {
+      if (marker) {
+        return { ...prev, [key]: marker };
+      } else {
+        const newMarkers = { ...prev };
+        delete newMarkers[key];
+        return newMarkers;
+      }
+    });
+  };
   return (
     <>
       {pois.map((poi) => (
-        <AdvancedMarker key={poi.key} position={poi.location}>
+        <AdvancedMarker
+          key={poi.key}
+          position={poi.location}
+          ref={(marker) => setMarkerRef(marker, poi.key)}
+        >
           <Pin
             background={"#FBBC04"}
             glyphColor={"#000"}
