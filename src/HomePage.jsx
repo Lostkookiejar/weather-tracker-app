@@ -7,6 +7,7 @@ import {
   useMap,
 } from "@vis.gl/react-google-maps";
 import { MarkerClusterer } from "@googlemaps/markerclusterer";
+import { Card, Col, Container, Row } from "react-bootstrap";
 
 const locations = [
   { key: "operaHouse", location: { lat: -33.8567844, lng: 151.213108 } },
@@ -61,31 +62,35 @@ function HomePage() {
   */
   return (
     <>
-      <APIProvider
-        apiKey={mapsApiKey}
-        onLoad={() => console.log("Maps API has loaded")}
-      >
-        <Map
-          defaultZoom={13}
-          defaultCenter={{ lat: -33.860664, lng: 151.208138 }}
-          mapId="59684e579f820bc4a08db50c"
-        >
-          <PoiMarkers pois={locations} />
-        </Map>
-      </APIProvider>
+      <Container>
+        <Row xs={12}>
+          <Col className="w-100">
+            <Card style={{ width: "30rem", height: "30rem" }}>
+              <Card.Body>
+                <APIProvider
+                  apiKey={mapsApiKey}
+                  onLoad={() => console.log("Maps API has loaded")}
+                >
+                  <Map
+                    defaultZoom={13}
+                    defaultCenter={{ lat: -33.860664, lng: 151.208138 }}
+                    mapId="59684e579f820bc4a08db50c"
+                  >
+                    <PoiMarkers pois={locations} />
+                  </Map>
+                </APIProvider>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+      </Container>
 
       {/* 
       <h1>Generate Weather button</h1>
       <button onClick={handleGenerateWeather}>Generate</button>
       {data && data.lat && (
         <>
-          <Card>
-            <Card.Body>
-              <p>{data.timezone}</p>
-              <p>{data.current.temp}</p>
-              <p>{data.daily[0].summary}</p>
-            </Card.Body>
-          </Card>
+          
         </>
       )}
       {data && data.cod && (
