@@ -12,6 +12,7 @@ import { Card, Col, Container, Row } from "react-bootstrap";
 function HomePage() {
   const mapsApiKey = import.meta.env.VITE_MAPS_API_KEY;
   const [locations, setLocations] = useState([]);
+
   const handleMapClick = (ev) => {
     if (!ev.detail.latLng) return;
     if (locations) {
@@ -55,49 +56,11 @@ function HomePage() {
 }
 
 const PoiMarkers = ({ pois }) => {
-  const map = useMap();
-  const [markers, setMarkers] = useState({});
-  const clusterer = useRef(null);
-
-  useEffect(() => {
-    if (!map) return;
-    if (!clusterer.current) {
-      clusterer.current = new MarkerClusterer({ map });
-    }
-  }, [map]);
-
-  useEffect(() => {
-    clusterer.current?.clearMarkers();
-    clusterer.current?.addMarkers(Object.values(markers));
-  }, [markers]);
-
-  const setMarkerRef = (marker, key) => {
-    if (marker && markers[key]) return;
-    if (!marker && !markers[key]) return;
-
-    setMarkers((prev) => {
-      if (marker) {
-        return { ...prev, [key]: marker };
-      } else {
-        const newMarkers = { ...prev };
-        delete newMarkers[key];
-        return newMarkers;
-      }
-    });
-  };
   return (
     <>
       {pois.map((poi) => (
-        <AdvancedMarker
-          key={poi.key}
-          position={poi.location}
-          ref={(marker) => setMarkerRef(marker, poi.key)}
-        >
-          <Pin
-            background={"#FBBC04"}
-            glyphColor={"#000"}
-            borderColor={"#000"}
-          />
+        <AdvancedMarker key={poi} position={poi}>
+          <Pin />
         </AdvancedMarker>
       ))}
     </>
