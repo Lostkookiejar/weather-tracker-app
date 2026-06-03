@@ -9,15 +9,21 @@ import {
 import { MarkerClusterer } from "@googlemaps/markerclusterer";
 import { Card, Col, Container, Row } from "react-bootstrap";
 
-const locations = [];
-
 function HomePage() {
   const mapsApiKey = import.meta.env.VITE_MAPS_API_KEY;
-
+  const [locations, setLocations] = useState([]);
   const handleMapClick = (ev) => {
     if (!ev.detail.latLng) return;
-    console.log(ev.detail.latLng);
+    if (locations) {
+      setLocations([...locations, ev.detail.latLng]);
+    } else {
+      setLocations([ev.detail.latLng]);
+    }
   };
+
+  useEffect(() => {
+    console.log(locations);
+  }, [locations]);
 
   return (
     <>
