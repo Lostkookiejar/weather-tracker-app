@@ -1,12 +1,10 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import {
   AdvancedMarker,
   APIProvider,
   Map,
   Pin,
-  useMap,
 } from "@vis.gl/react-google-maps";
-import { MarkerClusterer } from "@googlemaps/markerclusterer";
 import { Card, Col, Container, Row } from "react-bootstrap";
 
 function HomePage() {
