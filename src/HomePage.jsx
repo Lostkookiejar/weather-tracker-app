@@ -50,7 +50,9 @@ function HomePage() {
             <Col xs={4}>
               {locations &&
                 locations.map((lction, index) => (
-                  <p key={index}>{lction.lat}</p>
+                  <p key={index}>
+                    {lction.lat}, {lction.lng}
+                  </p>
                 ))}
             </Col>
           </Row>
