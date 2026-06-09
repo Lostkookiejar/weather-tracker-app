@@ -24,6 +24,14 @@ function HomePage() {
     console.log(locations);
   }, [locations]);
 
+  const getLocation = function () {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => console.log(position.coords.latitude),
+        () => alert("Sorry, no position available"),
+      );
+    }
+  };
   return (
     <>
       <div className="min-vh-100">
@@ -48,6 +56,7 @@ function HomePage() {
               </Card>
             </Col>
             <Col xs={4}>
+              <button onClick={getLocation}>Get Location</button>
               {locations &&
                 locations.map((lction, index) => (
                   <p key={index}>
