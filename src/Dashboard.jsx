@@ -28,10 +28,8 @@ function Dashboard() {
             <Card className="h-100 shadow-sm">
               <Card.Body>
                 <Card.Title>Active Stations</Card.Title>
-                <Card.Text className="display-6 fw-bold mb-0">12</Card.Text>
-                <div className="text-success mt-3">
-                  2 new stations added in the last 24 hours
-                </div>
+                <Card.Text className="display-6 fw-bold mb-0">--</Card.Text>
+                <div className="text-success mt-3">--</div>
               </Card.Body>
             </Card>
           </Col>
@@ -40,10 +38,8 @@ function Dashboard() {
             <Card className="h-100 shadow-sm">
               <Card.Body>
                 <Card.Title>Current Alerts</Card.Title>
-                <Card.Text className="display-6 fw-bold mb-0">3</Card.Text>
-                <div className="text-danger mt-3">
-                  Severe wind and flood alerts active
-                </div>
+                <Card.Text className="display-6 fw-bold mb-0">--</Card.Text>
+                <div className="text-danger mt-3">--</div>
               </Card.Body>
             </Card>
           </Col>
@@ -52,8 +48,8 @@ function Dashboard() {
             <Card className="h-100 shadow-sm">
               <Card.Body>
                 <Card.Title>Uptime</Card.Title>
-                <Card.Text className="display-6 fw-bold mb-3">99.7%</Card.Text>
-                <ProgressBar now={99.7} label="99.7%" />
+                <Card.Text className="display-6 fw-bold mb-3">--</Card.Text>
+                <ProgressBar now={0} label="0%" />
               </Card.Body>
             </Card>
           </Col>
@@ -75,7 +71,7 @@ function Dashboard() {
                       <h6 className="text-uppercase text-secondary">
                         Temperature
                       </h6>
-                      <p className="fs-3 mb-0">22°C</p>
+                      <p className="fs-3 mb-0">--</p>
                       <small className="text-muted">
                         Average over last hour
                       </small>
@@ -86,7 +82,7 @@ function Dashboard() {
                       <h6 className="text-uppercase text-secondary">
                         Humidity
                       </h6>
-                      <p className="fs-3 mb-0">63%</p>
+                      <p className="fs-3 mb-0">--</p>
                       <small className="text-muted">
                         Current station average
                       </small>
@@ -95,7 +91,7 @@ function Dashboard() {
                   <Col sm={4}>
                     <div className="p-3 rounded bg-white border">
                       <h6 className="text-uppercase text-secondary">Wind</h6>
-                      <p className="fs-3 mb-0">14 km/h</p>
+                      <p className="fs-3 mb-0">--</p>
                       <small className="text-muted">Peak gusts</small>
                     </div>
                   </Col>
@@ -112,33 +108,33 @@ function Dashboard() {
                   <ListGroup.Item>
                     <div className="d-flex justify-content-between align-items-start">
                       <div>
-                        <div className="fw-semibold">Flood Watch</div>
-                        <small className="text-muted">Coastal region</small>
+                        <div className="fw-semibold">--</div>
+                        <small className="text-muted">--</small>
                       </div>
                       <Badge bg="warning" pill>
-                        Medium
+                        --
                       </Badge>
                     </div>
                   </ListGroup.Item>
                   <ListGroup.Item>
                     <div className="d-flex justify-content-between align-items-start">
                       <div>
-                        <div className="fw-semibold">Wind Advisory</div>
-                        <small className="text-muted">Northern range</small>
+                        <div className="fw-semibold">--</div>
+                        <small className="text-muted">--</small>
                       </div>
                       <Badge bg="danger" pill>
-                        High
+                        --
                       </Badge>
                     </div>
                   </ListGroup.Item>
                   <ListGroup.Item>
                     <div className="d-flex justify-content-between align-items-start">
                       <div>
-                        <div className="fw-semibold">Temperature Spike</div>
-                        <small className="text-muted">East valley</small>
+                        <div className="fw-semibold">--</div>
+                        <small className="text-muted">--</small>
                       </div>
                       <Badge bg="info" pill>
-                        Low
+                        --
                       </Badge>
                     </div>
                   </ListGroup.Item>
