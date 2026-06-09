@@ -1,17 +1,21 @@
 import { BrowserRouter, Route, Routes, Link } from "react-router-dom";
 import { Container, Nav, Navbar } from "react-bootstrap";
-import HomePage from "./HomePage";
-import Dashboard from "./Dashboard";
+import HomePage from "../HomePage";
+import Dashboard from "../Dashboard";
+import store from "./store";
+import { Provider } from "react-redux";
 
 const App = function () {
   return (
     <BrowserRouter>
-      <Navb />
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="*" element={<HomePage />} />
-      </Routes>
+      <Provider store={store}>
+        <Navb />
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="*" element={<HomePage />} />
+        </Routes>
+      </Provider>
     </BrowserRouter>
   );
 };

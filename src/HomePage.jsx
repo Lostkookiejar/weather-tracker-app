@@ -6,10 +6,14 @@ import {
   Pin,
 } from "@vis.gl/react-google-maps";
 import { Card, Col, Container, Row } from "react-bootstrap";
+import { useDispatch, useSelector } from "react-redux";
+import { getCurrentPosition } from "./features/locationSlice";
 
 function HomePage() {
   const mapsApiKey = import.meta.env.VITE_MAPS_API_KEY;
   const [locations, setLocations] = useState([]);
+  const dispatch = useDispatch();
+  const currentPosition = useSelector((state) => state.location.value);
 
   const handleMapClick = (ev) => {
     if (!ev.detail.latLng) return;
@@ -20,18 +24,18 @@ function HomePage() {
     }
   };
 
-  useEffect(() => {
-    console.log(locations);
-  }, [locations]);
-
-  const getLocation = function () {
+  const getCurrentLocation = function () {
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => console.log(position.coords.latitude),
-        () => alert("Sorry, no position available"),
-      );
+      navigator.geolocation.getCurrentPosition((position) => {
+        const response = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        };
+        dispatch(getCurrentPosition(response));
+      });
     }
   };
+
   return (
     <>
       <div className="min-vh-100">
@@ -56,7 +60,8 @@ function HomePage() {
               </Card>
             </Col>
             <Col xs={4}>
-              <button onClick={getLocation}>Get Location</button>
+              <button onClick={getCurrentLocation}>Get Location</button>
+              {currentPosition && <p>CurrentPosition: {currentPosition.lat}</p>}
               {locations &&
                 locations.map((lction, index) => (
                   <p key={index}>
