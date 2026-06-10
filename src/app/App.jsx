@@ -1,6 +1,6 @@
 import { BrowserRouter, Route, Routes, Link } from "react-router-dom";
 import { Container, Nav, Navbar } from "react-bootstrap";
-import HomePage from "../HomePage";
+import Planner from "../Planner";
 import Dashboard from "../Dashboard";
 import store from "./store";
 import { Provider } from "react-redux";
@@ -11,9 +11,9 @@ const App = function () {
       <Provider store={store}>
         <Navb />
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="*" element={<HomePage />} />
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/planner" element={<Planner />} />
+          <Route path="*" element={<Dashboard />} />
         </Routes>
       </Provider>
     </BrowserRouter>
@@ -30,10 +30,10 @@ const Navb = function () {
         <Navbar.Toggle aria-controls="main-navbar" />
         <Navbar.Collapse id="main-navbar">
           <Nav className="me-auto">
-            <Nav.Link as={Link} to="/">
-              Home
+            <Nav.Link as={Link} to="/planner">
+              Trip Planner
             </Nav.Link>
-            <Nav.Link as={Link} to="/dashboard">
+            <Nav.Link as={Link} to="/">
               Dashboard
             </Nav.Link>
           </Nav>

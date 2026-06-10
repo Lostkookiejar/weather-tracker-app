@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useState } from "react";
 import {
   Container,
   Row,
@@ -7,14 +8,87 @@ import {
   ListGroup,
   Badge,
   ProgressBar,
+  Spinner,
 } from "react-bootstrap";
+import { useDispatch, useSelector } from "react-redux";
+import { getCurrentPosition } from "./features/locationSlice";
 
 function Dashboard() {
+  //.env
+  const mapsApiKey = import.meta.env.VITE_MAPS_API_KEY;
+
+  //React Hook for Redux Management
+  const dispatch = useDispatch();
+
+  //React Hook to get current position from Redux store @ store.js
+  const currentPosition = useSelector((state) => state.location.value);
+
+  //Called on success from HTML Geolocation API call
+  const handleCurrentLocation = useCallback(
+    (position) => {
+      const response = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+      };
+      dispatch(getCurrentPosition(response));
+    },
+    [dispatch],
+  );
+
+  //Called on error from HTML Geolocation API call
+  const handleLocationError = useCallback((error) => {
+    console.error("Geolocation error:", error);
+  }, []);
+
+  //called when currentPosition is updated successfully.
+  useEffect(() => {
+    if (!currentPosition?.lat || !currentPosition?.lng) return;
+
+    fetch(
+      `https://weather.googleapis.com/v1/forecast/days:lookup?key=${mapsApiKey}&location.latitude=${currentPosition.lat}&location.longitude=${currentPosition.lng}`,
+    )
+      .then((response) => response.json())
+      .then((data) => console.log(data));
+  }, [currentPosition?.lat, currentPosition?.lng]);
   return (
     <div className="min-vh-100 bg-light py-4">
       <Container>
+        <Row>
+          <Col>
+            {/**
+             * Handling Geolocation after user accepts Geolocation
+             * API Prompt
+             */}
+            <GeolocationRequest
+              onSuccess={handleCurrentLocation}
+              onError={handleLocationError}
+            >
+              <div>
+                <Spinner />
+                <div className="text-muted">
+                  Fetching Current Position...(Please allow access to your
+                  location if prompted)
+                </div>
+              </div>
+            </GeolocationRequest>
+
+            {/**
+             * Renders as test UI when currentPosition is returned
+             * TODO: PLEASE DELETE WHEN NO LONGER NEEDED
+             */}
+            {currentPosition && (
+              <p>
+                CurrentPosition: {currentPosition.lat}, {currentPosition.lng}
+              </p>
+            )}
+          </Col>
+        </Row>
         <Row className="mb-4">
           <Col>
+            {/**
+             * Stat tracker dashboard
+             * TODO: CREATE FUNCTION TO GET WEATHER DATA FROM EXTERNAL API
+             */}
             <h1 className="mb-2">Dashboard</h1>
             <p className="text-muted">
               Overview of weather tracking metrics, status updates, and recent
@@ -165,5 +239,35 @@ function Dashboard() {
     </div>
   );
 }
+
+const GeolocationRequest = ({ onSuccess, onError, children }) => {
+  const [isPending, setIsPending] = useState(false);
+
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      onError?.(new Error("Geolocation is not supported by this browser."));
+      return;
+    }
+
+    setIsPending(true);
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setIsPending(false);
+        onSuccess(position);
+      },
+      (error) => {
+        setIsPending(false);
+        onError?.(error);
+      },
+    );
+  }, [onSuccess, onError]);
+
+  if (!isPending) {
+    return null;
+  }
+
+  return <div>{children ?? "Something went wrong. Please try again."}</div>;
+};
 
 export default Dashboard;
