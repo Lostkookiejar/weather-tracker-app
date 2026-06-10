@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   AdvancedMarker,
   APIProvider,
   Map,
   Pin,
 } from "@vis.gl/react-google-maps";
-import { Card, Col, Container, Row } from "react-bootstrap";
+import { Card, Col, Container, Row, Spinner } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { getCurrentPosition } from "./features/locationSlice";
 
@@ -24,17 +24,20 @@ function HomePage() {
     }
   };
 
-  const getCurrentLocation = function () {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition((position) => {
-        const response = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        };
-        dispatch(getCurrentPosition(response));
-      });
-    }
-  };
+  const handleCurrentLocation = useCallback(
+    (position) => {
+      const response = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+      };
+      dispatch(getCurrentPosition(response));
+    },
+    [dispatch],
+  );
+
+  const handleLocationError = useCallback((error) => {
+    console.error("Geolocation error:", error);
+  }, []);
 
   return (
     <>
@@ -60,8 +63,24 @@ function HomePage() {
               </Card>
             </Col>
             <Col xs={4}>
-              <button onClick={getCurrentLocation}>Get Location</button>
-              {currentPosition && <p>CurrentPosition: {currentPosition.lat}</p>}
+              <GeolocationRequest
+                onSuccess={handleCurrentLocation}
+                onError={handleLocationError}
+              >
+                <div>
+                  <Spinner />
+                  <div className="text-muted">
+                    Fetching Current Position...(Please allow access to your
+                    location when prompted)
+                  </div>
+                </div>
+              </GeolocationRequest>
+
+              {currentPosition && (
+                <p>
+                  CurrentPosition: {currentPosition.lat}, {currentPosition.lng}
+                </p>
+              )}
               {locations &&
                 locations.map((lction, index) => (
                   <p key={index}>
@@ -86,6 +105,36 @@ const PoiMarkers = ({ pois }) => {
       ))}
     </>
   );
+};
+
+const GeolocationRequest = ({ onSuccess, onError, children }) => {
+  const [isPending, setIsPending] = useState(false);
+
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      onError?.(new Error("Geolocation is not supported by this browser."));
+      return;
+    }
+
+    setIsPending(true);
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setIsPending(false);
+        onSuccess(position);
+      },
+      (error) => {
+        setIsPending(false);
+        onError?.(error);
+      },
+    );
+  }, [onSuccess, onError]);
+
+  if (!isPending) {
+    return null;
+  }
+
+  return <div>{children ?? <Spinner />}</div>;
 };
 
 export default HomePage;
