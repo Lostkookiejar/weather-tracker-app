@@ -11,7 +11,7 @@ import {
   Spinner,
 } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
-import { getCurrentPosition } from "./features/locationSlice";
+import { getCurrentPosition } from "../features/locationSlice";
 
 function Dashboard() {
   //.env

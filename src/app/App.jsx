@@ -1,7 +1,8 @@
 import { BrowserRouter, Route, Routes, Link } from "react-router-dom";
 import { Container, Nav, Navbar } from "react-bootstrap";
-import Planner from "../Planner";
-import Dashboard from "../Dashboard";
+import LandingPage from "../pages/LandingPage";
+import Planner from "../pages/Planner";
+import Dashboard from "../pages/Dashboard";
 import store from "./store";
 import { Provider } from "react-redux";
 
@@ -11,9 +12,10 @@ const App = function () {
       <Provider store={store}>
         <Navb />
         <Routes>
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/planner" element={<Planner />} />
-          <Route path="*" element={<Dashboard />} />
+          <Route path="*" element={<LandingPage />} />
         </Routes>
       </Provider>
     </BrowserRouter>
