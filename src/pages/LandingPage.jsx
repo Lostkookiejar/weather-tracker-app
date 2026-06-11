@@ -43,8 +43,8 @@ function LandingPage() {
                     weather metrics.
                   </ListGroup.Item>
                   <ListGroup.Item>
-                    Built with React, Bootstrap, and Google Maps for fast load
-                    times.
+                    Built with Vite, React, Bootstrap, and Google Maps for fast
+                    load times.
                   </ListGroup.Item>
                 </ListGroup>
               </Card.Body>
