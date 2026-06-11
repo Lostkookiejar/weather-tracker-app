@@ -12,6 +12,7 @@ import {
 } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { getCurrentPosition } from "../features/locationSlice";
+import { getCurrentWeather } from "../features/currentWeatherSlice";
 
 function Dashboard() {
   //.env
@@ -47,11 +48,7 @@ function Dashboard() {
     if (!currentPosition?.lat || !currentPosition?.lng) return;
     if (geolocationError) return;
 
-    fetch(
-      `https://weather.googleapis.com/v1/forecast/days:lookup?key=${mapsApiKey}&location.latitude=${currentPosition.lat}&location.longitude=${currentPosition.lng}`,
-    )
-      .then((response) => response.json())
-      .then((data) => console.log(data));
+    dispatch(getCurrentWeather(currentPosition));
   }, [currentPosition?.lat, currentPosition?.lng]);
 
   return (
@@ -114,7 +111,7 @@ function Dashboard() {
           <Col lg={4}>
             <Card className="h-100 shadow-sm">
               <Card.Body>
-                <Card.Title>Active Stations</Card.Title>
+                <Card.Title>Description</Card.Title>
                 <Card.Text className="display-6 fw-bold mb-0">--</Card.Text>
                 <div className="text-success mt-3">--</div>
               </Card.Body>
