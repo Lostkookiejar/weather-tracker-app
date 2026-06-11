@@ -35,7 +35,7 @@ const Navb = function () {
             <Nav.Link as={Link} to="/planner">
               Trip Planner
             </Nav.Link>
-            <Nav.Link as={Link} to="/">
+            <Nav.Link as={Link} to="/dashboard">
               Dashboard
             </Nav.Link>
           </Nav>
