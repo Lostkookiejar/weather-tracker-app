@@ -12,7 +12,6 @@ import {
 } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { getCurrentPosition } from "../features/locationSlice";
-import { current } from "@reduxjs/toolkit";
 
 function Dashboard() {
   //.env
@@ -46,6 +45,7 @@ function Dashboard() {
   //called when currentPosition is updated successfully.
   useEffect(() => {
     if (!currentPosition?.lat || !currentPosition?.lng) return;
+    if (geolocationError) return;
 
     fetch(
       `https://weather.googleapis.com/v1/forecast/days:lookup?key=${mapsApiKey}&location.latitude=${currentPosition.lat}&location.longitude=${currentPosition.lng}`,
