@@ -12,6 +12,7 @@ import {
 } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { getCurrentPosition } from "../features/locationSlice";
+import { current } from "@reduxjs/toolkit";
 
 function Dashboard() {
   //.env
@@ -36,8 +37,10 @@ function Dashboard() {
   );
 
   //Called on error from HTML Geolocation API call
+  const [geolocationError, setGeolocationError] = useState(false);
   const handleLocationError = useCallback((error) => {
     console.error("Geolocation error:", error);
+    setGeolocationError(true);
   }, []);
 
   //called when currentPosition is updated successfully.
@@ -50,6 +53,7 @@ function Dashboard() {
       .then((response) => response.json())
       .then((data) => console.log(data));
   }, [currentPosition?.lat, currentPosition?.lng]);
+
   return (
     <div className="min-vh-100 bg-light py-4">
       <Container>
@@ -60,6 +64,7 @@ function Dashboard() {
              * API Prompt
              */}
             <GeolocationRequest
+              currentPosition={currentPosition}
               onSuccess={handleCurrentLocation}
               onError={handleLocationError}
             >
@@ -76,9 +81,17 @@ function Dashboard() {
              * Renders as test UI when currentPosition is returned
              * TODO: PLEASE DELETE WHEN NO LONGER NEEDED
              */}
-            {currentPosition && (
+            {currentPosition.lat ? (
               <p>
-                CurrentPosition: {currentPosition.lat}, {currentPosition.lng}
+                <Badge bg="success">Current Position received</Badge>
+              </p>
+            ) : !geolocationError ? (
+              <p>
+                <Badge bg="warning">Current Position pending...</Badge>
+              </p>
+            ) : (
+              <p>
+                <Badge bg="danger">Something went wrong.</Badge>
               </p>
             )}
           </Col>
@@ -240,7 +253,12 @@ function Dashboard() {
   );
 }
 
-const GeolocationRequest = ({ onSuccess, onError, children }) => {
+const GeolocationRequest = ({
+  currentPosition,
+  onSuccess,
+  onError,
+  children,
+}) => {
   const [isPending, setIsPending] = useState(false);
 
   useEffect(() => {
@@ -248,6 +266,8 @@ const GeolocationRequest = ({ onSuccess, onError, children }) => {
       onError?.(new Error("Geolocation is not supported by this browser."));
       return;
     }
+
+    if (currentPosition.lat || currentPosition.lng) return;
 
     setIsPending(true);
 

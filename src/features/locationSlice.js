@@ -7,6 +7,7 @@ export const locationSlice = createSlice({
   },
   reducers: {
     getCurrentPosition: (state, action) => {
+      if (state.value.lat || state.value.lng) return;
       state.value = {
         lat: action.payload.lat,
         lng: action.payload.lng,
