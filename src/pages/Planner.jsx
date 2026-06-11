@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   AdvancedMarker,
   APIProvider,
@@ -7,7 +7,7 @@ import {
 } from "@vis.gl/react-google-maps";
 import { Card, Col, Container, Row } from "react-bootstrap";
 
-function HomePage() {
+function Planner() {
   const mapsApiKey = import.meta.env.VITE_MAPS_API_KEY;
   const [locations, setLocations] = useState([]);
 
@@ -19,10 +19,6 @@ function HomePage() {
       setLocations([ev.detail.latLng]);
     }
   };
-
-  useEffect(() => {
-    console.log(locations);
-  }, [locations]);
 
   return (
     <>
@@ -74,4 +70,4 @@ const PoiMarkers = ({ pois }) => {
   );
 };
 
-export default HomePage;
+export default Planner;
