@@ -6,8 +6,9 @@ export const getCurrentWeather = createAsyncThunk(
     const mapsApiKey = import.meta.env.VITE_MAPS_API_KEY;
     const { lat, lng } = position;
 
-    const url = `https://weather.googleapis.com/v1/forecast/days:lookup?key=${mapsApiKey}&location.latitude=${lat}&location.longitude=${lng}`;
+    const url = `https://weather.googleapis.com/v1/forecast/days:lookup?key=${mapsApiKey}&location.latitude=${lat}&location.longitude=${lng}&days=1`;
     const response = await fetch(url);
+
     return await response.json();
   },
 );
