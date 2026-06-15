@@ -1,16 +1,17 @@
 import { useEffect, useState } from "react";
 import { Card, Col, ListGroup, Row, Spinner } from "react-bootstrap";
 import { useSelector } from "react-redux";
+import "../App.css";
 
 const DashboardContent = () => {
   const weather = useSelector((state) => state.currentWeather.value);
   const [days, setDays] = useState([]);
-  const [forecastError, setForecastError] = useState("false");
+  const [forecastState, setForecastState] = useState("false");
 
   useEffect(() => {
-    setForecastError("pending");
+    setForecastState("pending");
     if (!weather) {
-      setForecastError("error");
+      setForecastState("error");
       return;
     }
 
@@ -34,9 +35,8 @@ const DashboardContent = () => {
 
       daysCopy.push({ date, day, night });
     });
-    console.log(daysCopy);
     setDays([...daysCopy]);
-    setForecastError("false");
+    setForecastState("false");
   }, [weather]);
 
   return (
@@ -45,9 +45,11 @@ const DashboardContent = () => {
         <Col>
           <Card className="shadow-sm">
             <Card.Body>
-              <Card.Title>Daily Forecast</Card.Title>
-              {forecastError == "pending" && <Spinner />}
-              {forecastError == "error" && (
+              <Card.Title>
+                <strong>Daily Forecast</strong>
+              </Card.Title>
+              {forecastState == "pending" && <Spinner />}
+              {forecastState == "error" && (
                 <p>
                   Something went wrong. Please refresh browser and enable
                   location access
@@ -69,58 +71,100 @@ const DashboardContent = () => {
                     <div className="mb-3" key={idx}>
                       <h6 className="mb-2">{dateLabel}</h6>
                       <Row>
-                        <Col md={6} className="mb-2">
+                        <Col md={6} className="forecast-day">
                           <Card className="h-100">
                             <Card.Body>
-                              <Card.Subtitle className="mb-2 text-muted">
+                              <Card.Subtitle className="mb-2 text-muted d-flex align-items-center gap-2">
+                                <span className="forecast-mode-icon">☀️</span>{" "}
                                 Day
                               </Card.Subtitle>
                               <ListGroup variant="flush">
-                                <ListGroup.Item>
-                                  <strong>Precipitation:</strong>{" "}
-                                  {d.day.precipitation.probability.percent ??
-                                    "--"}
+                                <ListGroup.Item className="d-flex align-items-center forecast-metric">
+                                  <span className="forecast-metric-icon">
+                                    <i className="bi bi-cloud-rain-fill"></i>
+                                  </span>
+                                  <span>
+                                    <strong>Precipitation:</strong>{" "}
+                                    {d.day.precipitation.probability.percent ??
+                                      "--"}
+                                  </span>
                                 </ListGroup.Item>
-                                <ListGroup.Item>
-                                  <strong>Wind:</strong>{" "}
-                                  {d.day.wind.speed.value ?? "--"}
+                                <ListGroup.Item className="d-flex align-items-center forecast-metric">
+                                  <span className="forecast-metric-icon">
+                                    <i className="bi bi-wind"></i>
+                                  </span>
+                                  <span>
+                                    <strong>Wind:</strong>{" "}
+                                    {d.day.wind.speed.value ?? "--"}
+                                  </span>
                                 </ListGroup.Item>
-                                <ListGroup.Item>
-                                  <strong>Humidity:</strong>{" "}
-                                  {d.day.relativeHumidity ?? "--"}
+                                <ListGroup.Item className="d-flex align-items-center forecast-metric">
+                                  <span className="forecast-metric-icon">
+                                    <i className="bi bi-droplet"></i>
+                                  </span>
+                                  <span>
+                                    <strong>Humidity:</strong>{" "}
+                                    {d.day.relativeHumidity ?? "--"}
+                                  </span>
                                 </ListGroup.Item>
-                                <ListGroup.Item>
-                                  <strong>UV Index:</strong>{" "}
-                                  {d.day.uvIndex ?? "--"}
+                                <ListGroup.Item className="d-flex align-items-center forecast-metric">
+                                  <span className="forecast-metric-icon">
+                                    <i className="bi bi-sun-fill"></i>
+                                  </span>
+                                  <span>
+                                    <strong>UV Index:</strong>{" "}
+                                    {d.day.uvIndex ?? "--"}
+                                  </span>
                                 </ListGroup.Item>
                               </ListGroup>
                             </Card.Body>
                           </Card>
                         </Col>
 
-                        <Col md={6}>
+                        <Col md={6} className="forecast-night">
                           <Card className="h-100">
                             <Card.Body>
-                              <Card.Subtitle className="mb-2 text-muted">
+                              <Card.Subtitle className="mb-2 text-muted d-flex align-items-center gap-2">
+                                <span className="forecast-mode-icon">🌙</span>{" "}
                                 Night
                               </Card.Subtitle>
                               <ListGroup variant="flush">
-                                <ListGroup.Item>
-                                  <strong>Precipitation:</strong>{" "}
-                                  {d.night.precipitation.probability.percent ??
-                                    "--"}
+                                <ListGroup.Item className="d-flex align-items-center forecast-metric">
+                                  <span className="forecast-metric-icon">
+                                    <i className="bi bi-cloud-rain-fill"></i>
+                                  </span>
+                                  <span>
+                                    <strong>Precipitation:</strong>{" "}
+                                    {d.night.precipitation.probability
+                                      .percent ?? "--"}
+                                  </span>
                                 </ListGroup.Item>
-                                <ListGroup.Item>
-                                  <strong>Wind:</strong>{" "}
-                                  {d.night.wind.speed.value ?? "--"}
+                                <ListGroup.Item className="d-flex align-items-center forecast-metric">
+                                  <span className="forecast-metric-icon">
+                                    <i className="bi bi-wind"></i>
+                                  </span>
+                                  <span>
+                                    <strong>Wind:</strong>{" "}
+                                    {d.night.wind.speed.value ?? "--"}
+                                  </span>
                                 </ListGroup.Item>
-                                <ListGroup.Item>
-                                  <strong>Humidity:</strong>{" "}
-                                  {d.night.relativeHumidity ?? "--"}
+                                <ListGroup.Item className="d-flex align-items-center forecast-metric">
+                                  <span className="forecast-metric-icon">
+                                    <i className="bi bi-droplet"></i>
+                                  </span>
+                                  <span>
+                                    <strong>Humidity:</strong>{" "}
+                                    {d.night.relativeHumidity ?? "--"}
+                                  </span>
                                 </ListGroup.Item>
-                                <ListGroup.Item>
-                                  <strong>UV Index:</strong>{" "}
-                                  {d.night.uvIndex ?? "--"}
+                                <ListGroup.Item className="d-flex align-items-center forecast-metric">
+                                  <span className="forecast-metric-icon">
+                                    <i className="bi bi-sun-fill"></i>
+                                  </span>
+                                  <span>
+                                    <strong>UV Index:</strong>{" "}
+                                    {d.night.uvIndex ?? "--"}
+                                  </span>
                                 </ListGroup.Item>
                               </ListGroup>
                             </Card.Body>
