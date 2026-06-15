@@ -1,22 +1,26 @@
 import { useEffect, useState } from "react";
-import { Card, Col, ListGroup, Row } from "react-bootstrap";
+import { Card, Col, ListGroup, Row, Spinner } from "react-bootstrap";
 import { useSelector } from "react-redux";
 
 const DashboardContent = () => {
   const weather = useSelector((state) => state.currentWeather.value);
   const [days, setDays] = useState([]);
+  const [forecastError, setForecastError] = useState("false");
 
   useEffect(() => {
-    if (!weather) return;
+    setForecastError("pending");
+    if (!weather) {
+      setForecastError("error");
+      return;
+    }
 
     const source = weather.forecastDays;
-
     if (!Array.isArray(source)) return;
 
+    var daysCopy = [];
     source.forEach((item) => {
       const date = item.displayDate;
 
-      // Try OpenWeather style
       if (item.daytimeForecast) {
         var day = {
           ...item.daytimeForecast,
@@ -28,9 +32,11 @@ const DashboardContent = () => {
         };
       }
 
-      setDays([{ date, day, night }]);
+      daysCopy.push({ date, day, night });
     });
-    console.log(days);
+    console.log(daysCopy);
+    setDays([...daysCopy]);
+    setForecastError("false");
   }, [weather]);
 
   return (
@@ -40,13 +46,18 @@ const DashboardContent = () => {
           <Card className="shadow-sm">
             <Card.Body>
               <Card.Title>Daily Forecast</Card.Title>
-              {days.length === 0 ? (
-                <p className="text-muted">No forecast available.</p>
-              ) : (
+              {forecastError == "pending" && <Spinner />}
+              {forecastError == "error" && (
+                <p>
+                  Something went wrong. Please refresh browser and enable
+                  location access
+                </p>
+              )}
+              {days.length !== 0 &&
                 days.map((d, idx) => {
                   const dateLabel = new Date(
                     d.date.year,
-                    d.date.month,
+                    d.date.month - 1,
                     d.date.day,
                   ).toLocaleString("en-MY", {
                     year: "numeric",
@@ -118,8 +129,7 @@ const DashboardContent = () => {
                       </Row>
                     </div>
                   );
-                })
-              )}
+                })}
             </Card.Body>
           </Card>
         </Col>
