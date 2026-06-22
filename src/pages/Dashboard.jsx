@@ -5,6 +5,7 @@ import { getCurrentPosition } from "../features/locationSlice";
 import { getCurrentWeather } from "../features/currentWeatherSlice";
 import DashboardContent from "../components/DashboardContent";
 
+//TODO ADD IN TEXT INPUT TO KEY IN LOCATION MANUALLY
 function Dashboard() {
   //.env
 

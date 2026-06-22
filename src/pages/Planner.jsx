@@ -44,10 +44,17 @@ function Planner() {
       fields: ["formatted_address", "geometry", "name", "place_id"],
     };
 
+    //Google Maps Text Search
     const service = new window.google.maps.places.PlacesService(
+      //doesnt actually render anything, just a placeholder DOM required by constructor
       document.createElement("div"),
     );
+
+    //textSearch Query
     service.textSearch(request, (results, status) => {
+      //status is OK or otherwise
+      //results is an array >> https://developers.google.com/maps/documentation/javascript/reference/places-service#PlaceResult
+      //NOTE: PlacesServices is deprecated but is still in half-supported limbo
       if (status === window.google.maps.places.PlacesServiceStatus.OK) {
         const newLocations = results.map((result) => ({
           lat: result.geometry.location.lat(),
@@ -64,17 +71,30 @@ function Planner() {
     });
   };
 
+  //function for clicking on a location in the results search panel. Sets the Map to navigate on click.
   const handleLocationClick = (location) => {
     setMapCenter({ lat: location.lat, lng: location.lng });
   };
 
+  const dummyForecasts = locations.map((location) => ({
+    locationName: location.name || "Selected location",
+    days: [
+      { day: "Mon", high: 78, low: 62, condition: "Sunny" },
+      { day: "Tue", high: 75, low: 59, condition: "Partly Cloudy" },
+      { day: "Wed", high: 70, low: 55, condition: "Light Rain" },
+      { day: "Thu", high: 73, low: 57, condition: "Breezy" },
+      { day: "Fri", high: 80, low: 63, condition: "Clear" },
+    ],
+  }));
+
+  //<MapComponent /> contains <MapContent />, which contains the Map DOM element
   return (
     <>
       <div className="min-vh-100">
         <Container>
           <Row>
             <Col xs={8} className="position-relative">
-              <Card style={{ height: "100vh" }}>
+              <Card style={{ height: "30rem" }}>
                 <div className="map-overlay-container">
                   <div className="search-input-group">
                     <input
@@ -120,6 +140,37 @@ function Planner() {
                   </div>
                 ))}
               </div>
+            </Col>
+          </Row>
+          <Row className="mt-4">
+            <Col>
+              <Card>
+                <Card.Body>
+                  <h5>Daily Forecast</h5>
+                  {dummyForecasts.length === 0 ? (
+                    <p className="text-muted">
+                      Select one or more locations to view a condensed forecast.
+                    </p>
+                  ) : (
+                    dummyForecasts.map((forecast, index) => (
+                      <div key={index} className="mb-3">
+                        <h6 className="mb-2">{forecast.locationName}</h6>
+                        <div className="forecast-list">
+                          {forecast.days.map((day) => (
+                            <div key={day.day} className="forecast-item">
+                              <span>{day.day}</span>
+                              <span>{day.condition}</span>
+                              <span>
+                                {day.high}° / {day.low}°
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </Card.Body>
+              </Card>
             </Col>
           </Row>
         </Container>
