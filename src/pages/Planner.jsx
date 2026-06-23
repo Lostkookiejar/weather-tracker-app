@@ -76,6 +76,17 @@ function Planner() {
     setMapCenter({ lat: location.lat, lng: location.lng });
   };
 
+  const getIconForCondition = (condition) => {
+    const map = {
+      Sunny: "bi-sun-fill text-warning",
+      "Partly Cloudy": "bi-cloud-sun-fill text-secondary",
+      "Light Rain": "bi-cloud-rain-fill text-info",
+      Breezy: "bi-wind text-primary",
+      Clear: "bi-brightness-high-fill text-warning",
+    };
+    return map[condition] || "bi-cloud-fill text-muted";
+  };
+
   const dummyForecasts = locations.map((location) => ({
     locationName: location.name || "Selected location",
     days: [
@@ -155,17 +166,28 @@ function Planner() {
                     dummyForecasts.map((forecast, index) => (
                       <div key={index} className="mb-3">
                         <h6 className="mb-2">{forecast.locationName}</h6>
-                        <div className="forecast-list">
-                          {forecast.days.map((day) => (
-                            <div key={day.day} className="forecast-item">
-                              <span>{day.day}</span>
-                              <span>{day.condition}</span>
-                              <span>
-                                {day.high}° / {day.low}°
-                              </span>
-                            </div>
-                          ))}
-                        </div>
+                          <div className="forecast-list">
+                            {forecast.days.map((day) => (
+                              <div
+                                key={day.day}
+                                className="forecast-item d-flex justify-content-between align-items-center"
+                              >
+                                <div className="d-flex align-items-center">
+                                  <i
+                                    className={`bi ${getIconForCondition(
+                                      day.condition
+                                    )} me-2 fs-5`}
+                                    aria-hidden="true"
+                                  ></i>
+                                  <strong className="me-2">{day.day}</strong>
+                                  <span className="text-muted">{day.condition}</span>
+                                </div>
+                                <div className="text-nowrap">
+                                  {day.high}° / {day.low}°
+                                </div>
+                              </div>
+                            ))}
+                          </div>
                       </div>
                     ))
                   )}
