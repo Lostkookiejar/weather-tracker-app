@@ -134,22 +134,54 @@ function Planner() {
             </Col>
             <Col xs={4}>
               <div className="search-results-panel">
-                <h5>Results ({locations.length})</h5>
-                {locations.map((location, index) => (
-                  <div
-                    key={index}
-                    className="result-item"
-                    onClick={() => handleLocationClick(location)}
-                  >
-                    <strong>{location.name || `Location ${index + 1}`}</strong>
-                    <p className="result-coords">
-                      {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
+                <div className="results-header d-flex align-items-center justify-content-between mb-3">
+                  <h5 className="mb-0">
+                    <i className="bi bi-geo-alt-fill me-2 text-primary"></i>
+                    Results ({locations.length})
+                  </h5>
+                  <span className="badge bg-primary bg-opacity-10 text-primary px-3 py-2">
+                    {locations.length}
+                  </span>
+                </div>
+                {locations.length === 0 ? (
+                  <div className="empty-results text-center text-muted py-5">
+                    <i className="bi bi-search fs-1 mb-3"></i>
+                    <p className="mb-0">
+                      Search for a location to see results here.
                     </p>
-                    {location.address && (
-                      <p className="result-address">{location.address}</p>
-                    )}
                   </div>
-                ))}
+                ) : (
+                  locations.map((location, index) => (
+                    <button
+                      type="button"
+                      key={index}
+                      className="result-item"
+                      onClick={() => handleLocationClick(location)}
+                    >
+                      <div className="result-item-icon">
+                        <i className="bi bi-pin-map-fill"></i>
+                      </div>
+                      <div className="result-item-body">
+                        <strong>
+                          {location.name || `Location ${index + 1}`}
+                        </strong>
+                        <p className="result-coords mb-1">
+                          <i className="bi bi-geo-alt-fill me-1"></i>
+                          {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
+                        </p>
+                        {location.address && (
+                          <p className="result-address mb-0">
+                            <i className="bi bi-house-door me-1"></i>
+                            {location.address}
+                          </p>
+                        )}
+                      </div>
+                      <div className="result-item-action">
+                        <i className="bi bi-chevron-right"></i>
+                      </div>
+                    </button>
+                  ))
+                )}
               </div>
             </Col>
           </Row>
@@ -166,28 +198,30 @@ function Planner() {
                     dummyForecasts.map((forecast, index) => (
                       <div key={index} className="mb-3">
                         <h6 className="mb-2">{forecast.locationName}</h6>
-                          <div className="forecast-list">
-                            {forecast.days.map((day) => (
-                              <div
-                                key={day.day}
-                                className="forecast-item d-flex justify-content-between align-items-center"
-                              >
-                                <div className="d-flex align-items-center">
-                                  <i
-                                    className={`bi ${getIconForCondition(
-                                      day.condition
-                                    )} me-2 fs-5`}
-                                    aria-hidden="true"
-                                  ></i>
-                                  <strong className="me-2">{day.day}</strong>
-                                  <span className="text-muted">{day.condition}</span>
-                                </div>
-                                <div className="text-nowrap">
-                                  {day.high}° / {day.low}°
-                                </div>
+                        <div className="forecast-list">
+                          {forecast.days.map((day) => (
+                            <div
+                              key={day.day}
+                              className="forecast-item d-flex justify-content-between align-items-center"
+                            >
+                              <div className="d-flex align-items-center">
+                                <i
+                                  className={`bi ${getIconForCondition(
+                                    day.condition,
+                                  )} me-2 fs-5`}
+                                  aria-hidden="true"
+                                ></i>
+                                <strong className="me-2">{day.day}</strong>
+                                <span className="text-muted">
+                                  {day.condition}
+                                </span>
                               </div>
-                            ))}
-                          </div>
+                              <div className="text-nowrap">
+                                {day.high}° / {day.low}°
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     ))
                   )}
