@@ -19,6 +19,7 @@ function Planner() {
     lng: 151.208138,
   });
 
+  //sets a marker on the map widget when clicked.
   const handleMapClick = (ev) => {
     if (!ev.detail.latLng) return;
     if (locations) {
@@ -28,10 +29,12 @@ function Planner() {
     }
   };
 
+  //boiler function for setting search query
   const handleSearchChange = (e) => {
     setSearchInput(e.target.value);
   };
 
+  //search query function for pressing the 'Search' button or pressing the Enter key
   const handleSearch = () => {
     if (!searchInput.trim()) {
       console.log("Please enter a search query");
