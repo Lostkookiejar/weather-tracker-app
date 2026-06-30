@@ -12,6 +12,7 @@ import "../styles/MapOverlay.css";
 function Planner() {
   const mapsApiKey = import.meta.env.VITE_MAPS_API_KEY;
   const [locations, setLocations] = useState([]);
+  const [markedLocations, setMarkedLocations] = useState([]);
   const [searchInput, setSearchInput] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [mapCenter, setMapCenter] = useState({
@@ -19,14 +20,19 @@ function Planner() {
     lng: 151.208138,
   });
 
-  //sets a marker on the map widget when clicked.
+  //sets a yellow marker on the map widget when clicked.
   const handleMapClick = (ev) => {
     if (!ev.detail.latLng) return;
-    if (locations) {
-      setLocations([...locations, ev.detail.latLng]);
-    } else {
-      setLocations([ev.detail.latLng]);
-    }
+
+    const newMarker = {
+      lat: ev.detail.latLng.lat,
+      lng: ev.detail.latLng.lng,
+      name: "Marked location",
+      address: "",
+    };
+
+    setMarkedLocations((prev) => [...prev, newMarker]);
+    setMapCenter({ lat: newMarker.lat, lng: newMarker.lng });
   };
 
   //boiler function for setting search query
@@ -90,7 +96,7 @@ function Planner() {
     return map[condition] || "bi-cloud-fill text-muted";
   };
 
-  const dummyForecasts = locations.map((location) => ({
+  const dummyForecasts = markedLocations.map((location) => ({
     locationName: location.name || "Selected location",
     days: [
       { day: "Mon", high: 78, low: 62, condition: "Sunny" },
@@ -101,6 +107,7 @@ function Planner() {
     ],
   }));
 
+  const dummydummyForecasts = markedLocations.map((location) => ({}));
   //<MapComponent /> contains <MapContent />, which contains the Map DOM element
   return (
     <>
@@ -130,6 +137,7 @@ function Planner() {
                 <MapComponent
                   mapsApiKey={mapsApiKey}
                   locations={locations}
+                  markedLocations={markedLocations}
                   handleMapClick={handleMapClick}
                   mapCenter={mapCenter}
                 />
@@ -195,7 +203,8 @@ function Planner() {
                   <h5>Daily Forecast</h5>
                   {dummyForecasts.length === 0 ? (
                     <p className="text-muted">
-                      Select one or more locations to view a condensed forecast.
+                      Click on the map to add yellow-marked locations for the
+                      forecast.
                     </p>
                   ) : (
                     dummyForecasts.map((forecast, index) => (
@@ -238,11 +247,18 @@ function Planner() {
   );
 }
 
-function MapComponent({ mapsApiKey, locations, handleMapClick, mapCenter }) {
+function MapComponent({
+  mapsApiKey,
+  locations,
+  markedLocations,
+  handleMapClick,
+  mapCenter,
+}) {
   return (
     <APIProvider apiKey={mapsApiKey} libraries={["places"]}>
       <MapContent
         locations={locations}
+        markedLocations={markedLocations}
         handleMapClick={handleMapClick}
         mapCenter={mapCenter}
       />
@@ -250,7 +266,7 @@ function MapComponent({ mapsApiKey, locations, handleMapClick, mapCenter }) {
   );
 }
 
-function MapContent({ locations, handleMapClick, mapCenter }) {
+function MapContent({ locations, markedLocations, handleMapClick, mapCenter }) {
   const map = useMap();
 
   useEffect(() => {
@@ -269,6 +285,7 @@ function MapContent({ locations, handleMapClick, mapCenter }) {
       onClick={handleMapClick}
     >
       {locations && <PoiMarkers pois={locations} />}
+      {markedLocations && <YellowPoiMarkers pois={markedLocations} />}
     </Map>
   );
 }
@@ -276,9 +293,28 @@ function MapContent({ locations, handleMapClick, mapCenter }) {
 const PoiMarkers = ({ pois }) => {
   return (
     <>
-      {pois.map((poi) => (
-        <AdvancedMarker key={poi} position={poi}>
+      {pois.map((poi, index) => (
+        <AdvancedMarker key={`${poi.lat}-${poi.lng}-${index}`} position={poi}>
           <Pin />
+        </AdvancedMarker>
+      ))}
+    </>
+  );
+};
+
+const YellowPoiMarkers = ({ pois }) => {
+  return (
+    <>
+      {pois.map((poi, index) => (
+        <AdvancedMarker
+          key={`${poi.lat}-${poi.lng}-${index}-yellow`}
+          position={poi}
+        >
+          <Pin
+            background="#facc15"
+            borderColor="#ca8a04"
+            glyphColor="#1f2937"
+          />
         </AdvancedMarker>
       ))}
     </>
