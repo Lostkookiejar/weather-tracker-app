@@ -107,7 +107,47 @@ function Planner() {
     ],
   }));
 
-  const dummydummyForecasts = markedLocations.map((location) => ({}));
+  /*
+   * markedLocations = [
+   *  {
+   *    lat: int,
+   *    lng: int,
+   *    name: string ,
+   *    address: string
+   *  },
+   * ]
+   **/
+
+  useEffect(() => {
+    if (!markedLocations.length) return;
+
+    async function fetchTripWeather() {
+      try {
+        const weatherData = await Promise.all(
+          markedLocations.map(async (location) => {
+            const url = `https://weather.googleapis.com/v1/forecast/days:lookup?key=${mapsApiKey}&location.latitude=${location.lat}&location.longitude=${location.lng}&days=5`;
+
+            const response = await fetch(url);
+            if (!response.ok) {
+              throw new Error(`Weather request failed: ${response.status}`);
+            }
+
+            const weather = await response.json();
+            console.log("Weather data:", weather);
+            return weather;
+          }),
+        );
+
+        console.log("Trip weather data: ", weatherData);
+        //SET STATE HERE
+      } catch (error) {
+        console.error("Failed to fetch trip weather:", error);
+      }
+    }
+
+    fetchTripWeather();
+  }, [markedLocations, mapsApiKey]);
+
   //<MapComponent /> contains <MapContent />, which contains the Map DOM element
   return (
     <>
