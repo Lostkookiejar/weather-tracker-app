@@ -133,12 +133,23 @@ function Planner() {
   };
 
   const handleMarkerRemove = (markerIndex) => {
-    setMarkedLocations((prev) =>
-      prev.filter((_, index) => index !== markerIndex),
-    );
-    setTripForecasts((prev) =>
-      prev.filter((_, index) => index !== markerIndex),
-    );
+    setMarkedLocations((prev) => {
+      const updatedMarkers = prev.filter((_, index) => index !== markerIndex);
+
+      return updatedMarkers.map((marker, index) => ({
+        ...marker,
+        name: `Location ${index + 1}`,
+      }));
+    });
+
+    setTripForecasts((prev) => {
+      const updatedForecasts = prev.filter((_, index) => index !== markerIndex);
+
+      return updatedForecasts.map((forecast, index) => ({
+        ...forecast,
+        locationName: `Location ${index + 1}`,
+      }));
+    });
   };
 
   const getIconForCondition = (condition) => {
