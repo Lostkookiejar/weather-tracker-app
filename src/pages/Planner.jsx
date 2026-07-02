@@ -9,16 +9,56 @@ import {
 import { Card, Col, Container, Row } from "react-bootstrap";
 import "../styles/MapOverlay.css";
 
+const STORAGE_KEY = "planner-trip-state";
+
 function Planner() {
   const mapsApiKey = import.meta.env.VITE_MAPS_API_KEY;
   const [locations, setLocations] = useState([]);
   const [markedLocations, setMarkedLocations] = useState([]);
   const [searchInput, setSearchInput] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [tripForecasts, setTripForecasts] = useState([]);
+  const [isForecastLoading, setIsForecastLoading] = useState(false);
+  const [forecastError, setForecastError] = useState("");
   const [mapCenter, setMapCenter] = useState({
     lat: -33.860664,
     lng: 151.208138,
   });
+
+  useEffect(() => {
+    try {
+      const savedState = window.localStorage.getItem(STORAGE_KEY);
+      if (!savedState) return;
+
+      const parsedState = JSON.parse(savedState);
+      if (parsedState.markedLocations) {
+        setMarkedLocations(parsedState.markedLocations);
+      }
+      if (parsedState.tripForecasts) {
+        setTripForecasts(parsedState.tripForecasts);
+      }
+      if (parsedState.mapCenter) {
+        setMapCenter(parsedState.mapCenter);
+      }
+    } catch (error) {
+      console.error("Failed to restore planner state:", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({
+          markedLocations,
+          tripForecasts,
+          mapCenter,
+        }),
+      );
+    } catch (error) {
+      console.error("Failed to save planner state:", error);
+    }
+  }, [markedLocations, tripForecasts, mapCenter]);
 
   //sets a yellow marker on the map widget when clicked.
   const handleMapClick = (ev) => {
@@ -27,11 +67,18 @@ function Planner() {
     const newMarker = {
       lat: ev.detail.latLng.lat,
       lng: ev.detail.latLng.lng,
-      name: "Marked location",
+      name: "",
       address: "",
     };
 
-    setMarkedLocations((prev) => [...prev, newMarker]);
+    setMarkedLocations((prev) => {
+      const nextMarker = {
+        ...newMarker,
+        name: `Location ${prev.length + 1}`,
+      };
+
+      return [...prev, nextMarker];
+    });
     setMapCenter({ lat: newMarker.lat, lng: newMarker.lng });
   };
 
@@ -85,27 +132,93 @@ function Planner() {
     setMapCenter({ lat: location.lat, lng: location.lng });
   };
 
-  const getIconForCondition = (condition) => {
-    const map = {
-      Sunny: "bi-sun-fill text-warning",
-      "Partly Cloudy": "bi-cloud-sun-fill text-secondary",
-      "Light Rain": "bi-cloud-rain-fill text-info",
-      Breezy: "bi-wind text-primary",
-      Clear: "bi-brightness-high-fill text-warning",
-    };
-    return map[condition] || "bi-cloud-fill text-muted";
+  const handleMarkerRemove = (markerIndex) => {
+    setMarkedLocations((prev) => {
+      const updatedMarkers = prev.filter((_, index) => index !== markerIndex);
+
+      return updatedMarkers.map((marker, index) => ({
+        ...marker,
+        name: `Location ${index + 1}`,
+      }));
+    });
+
+    setTripForecasts((prev) => {
+      const updatedForecasts = prev.filter((_, index) => index !== markerIndex);
+
+      return updatedForecasts.map((forecast, index) => ({
+        ...forecast,
+        locationName: `Location ${index + 1}`,
+      }));
+    });
   };
 
-  const dummyForecasts = markedLocations.map((location) => ({
-    locationName: location.name || "Selected location",
-    days: [
-      { day: "Mon", high: 78, low: 62, condition: "Sunny" },
-      { day: "Tue", high: 75, low: 59, condition: "Partly Cloudy" },
-      { day: "Wed", high: 70, low: 55, condition: "Light Rain" },
-      { day: "Thu", high: 73, low: 57, condition: "Breezy" },
-      { day: "Fri", high: 80, low: 63, condition: "Clear" },
-    ],
-  }));
+  const getIconForCondition = (condition) => {
+    const normalizedCondition = String(condition || "").toLowerCase();
+
+    if (normalizedCondition.includes("clear")) {
+      return "bi-brightness-high-fill text-warning";
+    }
+
+    if (normalizedCondition.includes("cloud")) {
+      return "bi-cloud-sun-fill text-secondary";
+    }
+
+    if (normalizedCondition.includes("thunder")) {
+      return "bi-lightning-fill text-warning";
+    }
+
+    if (normalizedCondition.includes("rain")) {
+      return "bi-cloud-rain-fill text-info";
+    }
+
+    if (normalizedCondition.includes("snow")) {
+      return "bi-snow2 text-primary";
+    }
+
+    if (normalizedCondition.includes("wind")) {
+      return "bi-wind text-primary";
+    }
+
+    return "bi-cloud-fill text-muted";
+  };
+
+  const normalizeForecastData = (location, weatherResponse) => {
+    const forecastDays = weatherResponse?.forecastDays ?? [];
+
+    return {
+      locationName: location.name || "Selected location",
+      days: forecastDays.map((day) => {
+        const displayDate = day.displayDate;
+        const dayLabel =
+          displayDate &&
+          new Date(
+            displayDate.year,
+            displayDate.month - 1,
+            displayDate.day,
+          ).toLocaleDateString("en-US", {
+            weekday: "short",
+            month: "short",
+            day: "numeric",
+          });
+
+        return {
+          day: dayLabel || "Forecast",
+          high:
+            day.maxTemperature?.degrees != null
+              ? Math.round(day.maxTemperature.degrees)
+              : "--",
+          low:
+            day.minTemperature?.degrees != null
+              ? Math.round(day.minTemperature.degrees)
+              : "--",
+          condition:
+            day.daytimeForecast?.weatherCondition?.description?.text ||
+            "No forecast available",
+          conditionType: day.daytimeForecast?.weatherCondition?.type || "",
+        };
+      }),
+    };
+  };
 
   /*
    * markedLocations = [
@@ -119,9 +232,16 @@ function Planner() {
    **/
 
   useEffect(() => {
-    if (!markedLocations.length) return;
+    if (!markedLocations.length) {
+      setTripForecasts([]);
+      setForecastError("");
+      return;
+    }
 
     async function fetchTripWeather() {
+      setIsForecastLoading(true);
+      setForecastError("");
+
       try {
         const weatherData = await Promise.all(
           markedLocations.map(async (location) => {
@@ -133,15 +253,22 @@ function Planner() {
             }
 
             const weather = await response.json();
-            console.log("Weather data:", weather);
-            return weather;
+            return { location, weather };
           }),
         );
 
-        console.log("Trip weather data: ", weatherData);
-        //SET STATE HERE
+        const normalizedForecasts = weatherData.map(({ location, weather }) =>
+          normalizeForecastData(location, weather),
+        );
+        setTripForecasts(normalizedForecasts);
       } catch (error) {
         console.error("Failed to fetch trip weather:", error);
+        setForecastError(
+          "We couldn't load the forecast for the selected locations.",
+        );
+        setTripForecasts([]);
+      } finally {
+        setIsForecastLoading(false);
       }
     }
 
@@ -179,6 +306,7 @@ function Planner() {
                   locations={locations}
                   markedLocations={markedLocations}
                   handleMapClick={handleMapClick}
+                  handleMarkerRemove={handleMarkerRemove}
                   mapCenter={mapCenter}
                 />
               </Card>
@@ -241,41 +369,71 @@ function Planner() {
               <Card>
                 <Card.Body>
                   <h5>Daily Forecast</h5>
-                  {dummyForecasts.length === 0 ? (
+                  {isForecastLoading && (
+                    <p className="text-muted">Loading forecast data...</p>
+                  )}
+                  {forecastError && (
+                    <p className="text-danger">{forecastError}</p>
+                  )}
+                  {!isForecastLoading &&
+                  !forecastError &&
+                  tripForecasts.length === 0 ? (
                     <p className="text-muted">
                       Click on the map to add yellow-marked locations for the
                       forecast.
                     </p>
                   ) : (
-                    dummyForecasts.map((forecast, index) => (
-                      <div key={index} className="mb-3">
-                        <h6 className="mb-2">{forecast.locationName}</h6>
-                        <div className="forecast-list">
-                          {forecast.days.map((day) => (
-                            <div
-                              key={day.day}
-                              className="forecast-item d-flex justify-content-between align-items-center"
-                            >
-                              <div className="d-flex align-items-center">
-                                <i
-                                  className={`bi ${getIconForCondition(
-                                    day.condition,
-                                  )} me-2 fs-5`}
-                                  aria-hidden="true"
-                                ></i>
-                                <strong className="me-2">{day.day}</strong>
-                                <span className="text-muted">
-                                  {day.condition}
-                                </span>
+                    tripForecasts.map((forecast, index) => {
+                      const marker = markedLocations[index];
+
+                      return (
+                        <div
+                          key={`${forecast.locationName}-${index}`}
+                          className="mb-3"
+                        >
+                          <h6
+                            className="mb-2 text-primary"
+                            role="button"
+                            tabIndex={0}
+                            onClick={() =>
+                              marker && handleLocationClick(marker)
+                            }
+                            onKeyDown={(event) => {
+                              if (event.key === "Enter" || event.key === " ") {
+                                event.preventDefault();
+                                marker && handleLocationClick(marker);
+                              }
+                            }}
+                          >
+                            {forecast.locationName}
+                          </h6>
+                          <div className="forecast-list">
+                            {forecast.days.map((day, dayIndex) => (
+                              <div
+                                key={`${day.day}-${dayIndex}`}
+                                className="forecast-item d-flex justify-content-between align-items-center"
+                              >
+                                <div className="d-flex align-items-center">
+                                  <i
+                                    className={`bi ${getIconForCondition(
+                                      day.conditionType || day.condition,
+                                    )} me-2 fs-5`}
+                                    aria-hidden="true"
+                                  ></i>
+                                  <strong className="me-2">{day.day}</strong>
+                                  <span className="text-muted">
+                                    {day.condition}
+                                  </span>
+                                </div>
+                                <div className="text-nowrap">
+                                  {day.high}°C / {day.low}°C
+                                </div>
                               </div>
-                              <div className="text-nowrap">
-                                {day.high}° / {day.low}°
-                              </div>
-                            </div>
-                          ))}
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    ))
+                      );
+                    })
                   )}
                 </Card.Body>
               </Card>
@@ -292,6 +450,7 @@ function MapComponent({
   locations,
   markedLocations,
   handleMapClick,
+  handleMarkerRemove,
   mapCenter,
 }) {
   return (
@@ -300,13 +459,20 @@ function MapComponent({
         locations={locations}
         markedLocations={markedLocations}
         handleMapClick={handleMapClick}
+        handleMarkerRemove={handleMarkerRemove}
         mapCenter={mapCenter}
       />
     </APIProvider>
   );
 }
 
-function MapContent({ locations, markedLocations, handleMapClick, mapCenter }) {
+function MapContent({
+  locations,
+  markedLocations,
+  handleMapClick,
+  handleMarkerRemove,
+  mapCenter,
+}) {
   const map = useMap();
 
   useEffect(() => {
@@ -325,7 +491,12 @@ function MapContent({ locations, markedLocations, handleMapClick, mapCenter }) {
       onClick={handleMapClick}
     >
       {locations && <PoiMarkers pois={locations} />}
-      {markedLocations && <YellowPoiMarkers pois={markedLocations} />}
+      {markedLocations && (
+        <YellowPoiMarkers
+          pois={markedLocations}
+          onRemoveMarker={handleMarkerRemove}
+        />
+      )}
     </Map>
   );
 }
@@ -342,18 +513,20 @@ const PoiMarkers = ({ pois }) => {
   );
 };
 
-const YellowPoiMarkers = ({ pois }) => {
+const YellowPoiMarkers = ({ pois, onRemoveMarker }) => {
   return (
     <>
       {pois.map((poi, index) => (
         <AdvancedMarker
           key={`${poi.lat}-${poi.lng}-${index}-yellow`}
           position={poi}
+          onClick={() => onRemoveMarker(index)}
         >
           <Pin
             background="#facc15"
             borderColor="#ca8a04"
             glyphColor="#1f2937"
+            glyph={String(index + 1)}
           />
         </AdvancedMarker>
       ))}
