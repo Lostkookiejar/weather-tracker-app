@@ -9,6 +9,8 @@ import {
 import { Card, Col, Container, Row } from "react-bootstrap";
 import "../styles/MapOverlay.css";
 
+const STORAGE_KEY = "planner-trip-state";
+
 function Planner() {
   const mapsApiKey = import.meta.env.VITE_MAPS_API_KEY;
   const [locations, setLocations] = useState([]);
@@ -22,6 +24,41 @@ function Planner() {
     lat: -33.860664,
     lng: 151.208138,
   });
+
+  useEffect(() => {
+    try {
+      const savedState = window.localStorage.getItem(STORAGE_KEY);
+      if (!savedState) return;
+
+      const parsedState = JSON.parse(savedState);
+      if (parsedState.markedLocations) {
+        setMarkedLocations(parsedState.markedLocations);
+      }
+      if (parsedState.tripForecasts) {
+        setTripForecasts(parsedState.tripForecasts);
+      }
+      if (parsedState.mapCenter) {
+        setMapCenter(parsedState.mapCenter);
+      }
+    } catch (error) {
+      console.error("Failed to restore planner state:", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({
+          markedLocations,
+          tripForecasts,
+          mapCenter,
+        }),
+      );
+    } catch (error) {
+      console.error("Failed to save planner state:", error);
+    }
+  }, [markedLocations, tripForecasts, mapCenter]);
 
   //sets a yellow marker on the map widget when clicked.
   const handleMapClick = (ev) => {
@@ -93,6 +130,15 @@ function Planner() {
   //function for clicking on a location in the results search panel. Sets the Map to navigate on click.
   const handleLocationClick = (location) => {
     setMapCenter({ lat: location.lat, lng: location.lng });
+  };
+
+  const handleMarkerRemove = (markerIndex) => {
+    setMarkedLocations((prev) =>
+      prev.filter((_, index) => index !== markerIndex),
+    );
+    setTripForecasts((prev) =>
+      prev.filter((_, index) => index !== markerIndex),
+    );
   };
 
   const getIconForCondition = (condition) => {
@@ -249,6 +295,7 @@ function Planner() {
                   locations={locations}
                   markedLocations={markedLocations}
                   handleMapClick={handleMapClick}
+                  handleMarkerRemove={handleMarkerRemove}
                   mapCenter={mapCenter}
                 />
               </Card>
@@ -325,38 +372,57 @@ function Planner() {
                       forecast.
                     </p>
                   ) : (
-                    tripForecasts.map((forecast, index) => (
-                      <div
-                        key={`${forecast.locationName}-${index}`}
-                        className="mb-3"
-                      >
-                        <h6 className="mb-2">{forecast.locationName}</h6>
-                        <div className="forecast-list">
-                          {forecast.days.map((day, dayIndex) => (
-                            <div
-                              key={`${day.day}-${dayIndex}`}
-                              className="forecast-item d-flex justify-content-between align-items-center"
-                            >
-                              <div className="d-flex align-items-center">
-                                <i
-                                  className={`bi ${getIconForCondition(
-                                    day.conditionType || day.condition,
-                                  )} me-2 fs-5`}
-                                  aria-hidden="true"
-                                ></i>
-                                <strong className="me-2">{day.day}</strong>
-                                <span className="text-muted">
-                                  {day.condition}
-                                </span>
+                    tripForecasts.map((forecast, index) => {
+                      const marker = markedLocations[index];
+
+                      return (
+                        <div
+                          key={`${forecast.locationName}-${index}`}
+                          className="mb-3"
+                        >
+                          <h6
+                            className="mb-2 text-primary"
+                            role="button"
+                            tabIndex={0}
+                            onClick={() =>
+                              marker && handleLocationClick(marker)
+                            }
+                            onKeyDown={(event) => {
+                              if (event.key === "Enter" || event.key === " ") {
+                                event.preventDefault();
+                                marker && handleLocationClick(marker);
+                              }
+                            }}
+                          >
+                            {forecast.locationName}
+                          </h6>
+                          <div className="forecast-list">
+                            {forecast.days.map((day, dayIndex) => (
+                              <div
+                                key={`${day.day}-${dayIndex}`}
+                                className="forecast-item d-flex justify-content-between align-items-center"
+                              >
+                                <div className="d-flex align-items-center">
+                                  <i
+                                    className={`bi ${getIconForCondition(
+                                      day.conditionType || day.condition,
+                                    )} me-2 fs-5`}
+                                    aria-hidden="true"
+                                  ></i>
+                                  <strong className="me-2">{day.day}</strong>
+                                  <span className="text-muted">
+                                    {day.condition}
+                                  </span>
+                                </div>
+                                <div className="text-nowrap">
+                                  {day.high}°C / {day.low}°C
+                                </div>
                               </div>
-                              <div className="text-nowrap">
-                                {day.high}°C / {day.low}°C
-                              </div>
-                            </div>
-                          ))}
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    ))
+                      );
+                    })
                   )}
                 </Card.Body>
               </Card>
@@ -373,6 +439,7 @@ function MapComponent({
   locations,
   markedLocations,
   handleMapClick,
+  handleMarkerRemove,
   mapCenter,
 }) {
   return (
@@ -381,13 +448,20 @@ function MapComponent({
         locations={locations}
         markedLocations={markedLocations}
         handleMapClick={handleMapClick}
+        handleMarkerRemove={handleMarkerRemove}
         mapCenter={mapCenter}
       />
     </APIProvider>
   );
 }
 
-function MapContent({ locations, markedLocations, handleMapClick, mapCenter }) {
+function MapContent({
+  locations,
+  markedLocations,
+  handleMapClick,
+  handleMarkerRemove,
+  mapCenter,
+}) {
   const map = useMap();
 
   useEffect(() => {
@@ -406,7 +480,12 @@ function MapContent({ locations, markedLocations, handleMapClick, mapCenter }) {
       onClick={handleMapClick}
     >
       {locations && <PoiMarkers pois={locations} />}
-      {markedLocations && <YellowPoiMarkers pois={markedLocations} />}
+      {markedLocations && (
+        <YellowPoiMarkers
+          pois={markedLocations}
+          onRemoveMarker={handleMarkerRemove}
+        />
+      )}
     </Map>
   );
 }
@@ -423,13 +502,14 @@ const PoiMarkers = ({ pois }) => {
   );
 };
 
-const YellowPoiMarkers = ({ pois }) => {
+const YellowPoiMarkers = ({ pois, onRemoveMarker }) => {
   return (
     <>
       {pois.map((poi, index) => (
         <AdvancedMarker
           key={`${poi.lat}-${poi.lng}-${index}-yellow`}
           position={poi}
+          onClick={() => onRemoveMarker(index)}
         >
           <Pin
             background="#facc15"
