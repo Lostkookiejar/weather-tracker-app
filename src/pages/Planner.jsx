@@ -106,6 +106,10 @@ function Planner() {
       return "bi-cloud-sun-fill text-secondary";
     }
 
+    if (normalizedCondition.includes("thunder")) {
+      return "bi-lightning-fill text-warning";
+    }
+
     if (normalizedCondition.includes("rain")) {
       return "bi-cloud-rain-fill text-info";
     }
@@ -346,7 +350,7 @@ function Planner() {
                                 </span>
                               </div>
                               <div className="text-nowrap">
-                                {day.high}° / {day.low}°
+                                {day.high}°C / {day.low}°C
                               </div>
                             </div>
                           ))}
