@@ -5,6 +5,8 @@ import { getCurrentPosition } from "../features/locationSlice";
 import { getCurrentWeather } from "../features/currentWeatherSlice";
 import DashboardContent from "../components/DashboardContent";
 
+const LOCATION_CACHE_KEY = "user-current-location";
+
 //TODO ADD IN TEXT INPUT TO KEY IN LOCATION MANUALLY
 function Dashboard() {
   //.env
@@ -22,6 +24,8 @@ function Dashboard() {
         lat: position.coords.latitude,
         lng: position.coords.longitude,
       };
+      // Cache the location to avoid repeated geolocation prompts
+      window.localStorage.setItem(LOCATION_CACHE_KEY, JSON.stringify(response));
       dispatch(getCurrentPosition(response));
     },
     [dispatch],
@@ -94,6 +98,24 @@ const GeolocationRequest = ({
     }
 
     if (currentPosition.lat || currentPosition.lng) return;
+
+    // Check if location is already cached
+    try {
+      const cachedLocation = window.localStorage.getItem(LOCATION_CACHE_KEY);
+      if (cachedLocation) {
+        const location = JSON.parse(cachedLocation);
+        // Create a mock position object matching the geolocation API response
+        onSuccess({
+          coords: {
+            latitude: location.lat,
+            longitude: location.lng,
+          },
+        });
+        return;
+      }
+    } catch (error) {
+      console.warn("Failed to retrieve cached location:", error);
+    }
 
     setIsPending(true);
 

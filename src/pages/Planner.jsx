@@ -10,6 +10,7 @@ import { Card, Col, Container, Row } from "react-bootstrap";
 import "../styles/MapOverlay.css";
 
 const STORAGE_KEY = "planner-trip-state";
+const LOCATION_CACHE_KEY = "user-current-location";
 
 function Planner() {
   const mapsApiKey = import.meta.env.VITE_MAPS_API_KEY;
@@ -28,17 +29,55 @@ function Planner() {
   useEffect(() => {
     try {
       const savedState = window.localStorage.getItem(STORAGE_KEY);
-      if (!savedState) return;
+      if (savedState) {
+        const parsedState = JSON.parse(savedState);
+        if (parsedState.markedLocations) {
+          setMarkedLocations(parsedState.markedLocations);
+        }
+        if (parsedState.tripForecasts) {
+          setTripForecasts(parsedState.tripForecasts);
+        }
+        if (parsedState.mapCenter) {
+          setMapCenter(parsedState.mapCenter);
+        }
+      } else {
+        // Check if location is cached from Dashboard or previous visit
+        try {
+          const cachedLocation =
+            window.localStorage.getItem(LOCATION_CACHE_KEY);
+          if (cachedLocation) {
+            const location = JSON.parse(cachedLocation);
+            setMapCenter({
+              lat: location.lat,
+              lng: location.lng,
+            });
+            return;
+          }
+        } catch (error) {
+          console.warn("Failed to retrieve cached location:", error);
+        }
 
-      const parsedState = JSON.parse(savedState);
-      if (parsedState.markedLocations) {
-        setMarkedLocations(parsedState.markedLocations);
-      }
-      if (parsedState.tripForecasts) {
-        setTripForecasts(parsedState.tripForecasts);
-      }
-      if (parsedState.mapCenter) {
-        setMapCenter(parsedState.mapCenter);
+        // Get current location if no saved state and no cache
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              const location = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude,
+              };
+              // Cache the location to avoid repeated geolocation prompts
+              window.localStorage.setItem(
+                LOCATION_CACHE_KEY,
+                JSON.stringify(location),
+              );
+              setMapCenter(location);
+            },
+            (error) => {
+              console.warn("Failed to get current location:", error);
+              // Keep default Sydney location if geolocation fails
+            },
+          );
+        }
       }
     } catch (error) {
       console.error("Failed to restore planner state:", error);
