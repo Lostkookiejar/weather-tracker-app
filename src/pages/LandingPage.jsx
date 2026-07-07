@@ -11,26 +11,27 @@ import { Link } from "react-router-dom";
 
 const highlights = [
   {
-    icon: "bi-cloud-sun",
-    title: "Live forecasts",
-    text: "See current conditions and alerts at a glance before heading out.",
+    icon: "bi-speedometer2",
+    title: "Dashboard snapshot",
+    text: "Review your current location, daily forecasts, and key conditions like precipitation, wind, humidity, and UV index.",
   },
   {
     icon: "bi-map-fill",
-    title: "Trip planning",
-    text: "Pin destinations, compare routes, and prepare for changing skies.",
+    title: "Trip planner map",
+    text: "Search for places, place multiple stops on the map, and keep your route centered around the locations that matter most.",
   },
   {
-    icon: "bi-shield-check",
-    title: "Reliable insights",
-    text: "Make confident decisions with a streamlined weather dashboard.",
+    icon: "bi-calendar2-week",
+    title: "Day-ahead preparation",
+    text: "Use weather details and saved trip markers to plan commutes, outings, and travel with more confidence.",
   },
 ];
 
 const featurePoints = [
-  "Real-time weather insights for your current location.",
-  "Interactive map-based trip planning with place markers.",
-  "One dashboard for forecasts, alerts, and station health.",
+  "Automatically detects your location and brings current weather into view.",
+  "Displays day and night forecast cards with precipitation, wind, humidity, and UV insights.",
+  "Lets you search destinations, add map markers, and organize trip stops in one place.",
+  "Keeps your planner state and forecasts available for the next time you return.",
 ];
 
 function LandingPage() {
@@ -44,20 +45,21 @@ function LandingPage() {
               text="primary"
               className="rounded-pill mb-3 px-3 py-2"
             >
-              Weather intelligence for every trip
+              Weather planning for every journey
             </Badge>
             <h1 className="display-4 fw-bold text-dark mb-3">
-              Plan every outing with confidence.
+              See the forecast and map your trip in one place.
             </h1>
             <p className="lead text-muted mb-4">
-              Stay ahead of changing weather with a clear dashboard,
-              location-aware alerts, and an interactive trip planner built for
-              modern travel and outdoor planning.
+              The dashboard gives you fast access to current conditions and
+              detailed forecasts, while the trip planner helps you search
+              destinations, place markers on the map, and prepare for the
+              weather ahead.
             </p>
             <div className="d-flex gap-2 flex-wrap mb-4">
               <Button as={Link} to="/dashboard" variant="primary" size="lg">
                 <i className="bi bi-speedometer2 me-2"></i>
-                View Dashboard
+                Explore Dashboard
               </Button>
               <Button
                 as={Link}
@@ -72,15 +74,15 @@ function LandingPage() {
             <div className="d-flex flex-wrap gap-4 text-muted">
               <span className="d-flex align-items-center gap-2">
                 <i className="bi bi-cloud-sun text-primary fs-5"></i>
-                Live updates
+                Live forecasts
               </span>
               <span className="d-flex align-items-center gap-2">
                 <i className="bi bi-geo-alt text-primary fs-5"></i>
                 Location-aware
               </span>
               <span className="d-flex align-items-center gap-2">
-                <i className="bi bi-lightning-charge text-primary fs-5"></i>
-                Quick alerts
+                <i className="bi bi-map text-primary fs-5"></i>
+                Route planning
               </span>
             </div>
           </Col>
@@ -93,9 +95,9 @@ function LandingPage() {
                     <i className="bi bi-broadcast-pin text-primary fs-4"></i>
                   </div>
                   <div>
-                    <h5 className="mb-1">Why Weather Tracker?</h5>
+                    <h5 className="mb-1">What you can do here</h5>
                     <p className="text-muted mb-0">
-                      Everything you need in one place.
+                      Everything needed for weather-aware travel.
                     </p>
                   </div>
                 </div>
